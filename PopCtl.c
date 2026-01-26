@@ -16,7 +16,7 @@ int get_pop_num()
     }
     int unicorn_count = 0;
     do {
-        if (wcsncmp(pe.szExeFile, L"Unicorn", 8) == 0) {
+        if (wcsncmp(pe.szExeFile, L"Unicorn", 7) == 0) {
             unicorn_count++;
         }
     } while (Process32Next(hSnapShot, &pe));
@@ -29,7 +29,7 @@ void kill_one()
     hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     Process32First(hSnapShot, &pe);
     do {
-        if (wcsncmp(pe.szExeFile, L"Unicorn", 8) == 0 && Get_Hardware_Rand() % 2 == 0) {
+        if (wcsncmp(pe.szExeFile, L"Unicorn", 7) == 0 && Get_Hardware_Rand() % 2 == 0) {
             HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pe.th32ProcessID);
             if (hProcess != NULL) {
                 TerminateProcess(hProcess, 0);
