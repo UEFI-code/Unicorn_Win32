@@ -56,8 +56,7 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < NextNum; i++)
     {
-        for(int j=0; j<x86MaxInsLen; j++)
-            myFileBuffer[Get_Hardware_Rand() % myEXESize] = Get_Hardware_Rand() & 0xFF;
+        myFileBuffer[Get_Hardware_Rand() % myEXESize] = Get_Hardware_Rand() & 0xFF;
         
         while (fp == NULL)
         {
