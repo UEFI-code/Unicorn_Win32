@@ -17,13 +17,13 @@ char nextEXEName[256] = { 0 };
 char nextEXE_NTPath[256] = { 0 };
 
 void PopCtl();
-void create_process(char *ascii_path);
+void create_process(char *ascii_path, char *cwd);
 
 void create_proc_worker()
 {
     strcpy(nextEXE_NTPath, currentDIR);
     strcat(nextEXE_NTPath, nextEXEName);
-    create_process(nextEXE_NTPath);
+    create_process(nextEXE_NTPath, currentDIR+4);
 }
 
 int main(int argc, char** argv)
