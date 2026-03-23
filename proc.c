@@ -163,7 +163,7 @@ void create_process(char *ascii_path)
     WCHAR Env[2] = { 0, 0 };
     UNICODE_STRING win32_path = { 0 };
     RtlInitUnicodeString(&win32_path, nt_path.Buffer + 4);
-    NTSTATUS status = RtlCreateProcessParameters(&proc_param, &win32_path, NULL, &dll_path, Env, NULL, 0, 0, 0, 0);
+    NTSTATUS status = RtlCreateProcessParameters(&proc_param, &win32_path, NULL, &dll_path, Env, NULL, &nt_path, 0, 0, 0);
     if (!NT_SUCCESS(status))
     {
         printf("RtlCreateProcessParameters failed: 0x%X\n", RtlNtStatusToDosError(status));
