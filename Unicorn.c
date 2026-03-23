@@ -28,6 +28,7 @@ void create_proc_worker()
 
 int main(int argc, char** argv)
 {
+    //printf("---Unicorn Debug---\nargc = %d\nargv[0] = %s\n----\n", argc, argv[0]);
     UINT8 n = sprintf(currentDIR, "\\??\\%s", argv[0]);
     for (int i = n - 1; i >= 0; i--)
     {
