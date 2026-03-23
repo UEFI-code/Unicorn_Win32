@@ -169,6 +169,7 @@ void create_process(char *ascii_path)
         printf("RtlCreateProcessParameters failed: 0x%X\n", RtlNtStatusToDosError(status));
         return;
     }
+	  wprintf(L"nt_path: %wZ\n", &nt_path);
     RTL_USER_PROCESS_INFORMATION proc_info = {0};
     status = RtlCreateUserProcess(
         &nt_path,
